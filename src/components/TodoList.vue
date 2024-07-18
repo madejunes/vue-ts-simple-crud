@@ -35,10 +35,16 @@
     </div>
     <ul class="px-4 list-none" v-if="todos?.length">
       <li class="pb-4" v-for="todo_ in todos_" :key="todo_.id">
-        <TodoItem :todo="todo_" @delete-item="(e) => onDeleteTodo(e)" />
+        <TodoItem
+          :todo="todo_"
+          @delete-item="(e) => onDeleteTodo(e, todo_.title)"
+        />
       </li>
       <li class="pb-4" v-for="todo in todos" :key="todo.id">
-        <TodoItem :todo="todo" @delete-item="(e) => onDeleteTodo(e)" />
+        <TodoItem
+          :todo="todo"
+          @delete-item="(e) => onDeleteTodo(e, todo.title)"
+        />
       </li>
     </ul>
   </div>
@@ -95,12 +101,17 @@ const onAddNewTodo = () => {
     todos_.value?.push(dataToAdd);
   }
 };
-const onDeleteTodo = async (id: number) => {
-  const indexToDel = todos_.value?.findIndex((t) => (t.id = id));
-  if (indexToDel > -1) {
-    todos_.value?.splice(indexToDel, 1);
-  }
+const onDeleteTodo = async (id: number, title: string) => {
+  const delConfirmation = window.confirm(
+    `Are you sure to delete this item?\n"${title}"`
+  );
+  if (delConfirmation) {
+    const indexToDel = todos_.value?.findIndex((t) => (t.id = id));
+    if (indexToDel > -1) {
+      todos_.value?.splice(indexToDel, 1);
+    }
 
-  await ofetch(`${apiUrl}/${id}`, { method: "DELETE" });
+    await ofetch(`${apiUrl}/${id}`, { method: "DELETE" });
+  }
 };
 </script>
