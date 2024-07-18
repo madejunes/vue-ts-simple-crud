@@ -27,11 +27,12 @@
 import { ofetch } from "ofetch";
 import { TTodo } from "../types";
 import { apiUrl, userId } from "../contants";
+import { PropType } from "vue";
 
 // props
 defineProps({
   todo: {
-    type: Object as TTodo,
+    type: Object as PropType<TTodo>,
     default: () => ({}),
   },
 });
@@ -40,7 +41,7 @@ defineProps({
 defineEmits(["deleteItem"]);
 
 // methods
-const onChange = async (e: { target: { checked: boolean } }, id: number) => {
+const onChange = async (e: any, id: number) => {
   await ofetch(`${apiUrl}/${id}`, {
     method: "PUT",
     body: {
