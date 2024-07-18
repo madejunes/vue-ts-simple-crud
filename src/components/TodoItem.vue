@@ -7,6 +7,7 @@
         type="checkbox"
         :checked="todo.completed"
         class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+        @change="(e) => onChange(e, todo.id)"
       />
       <label
         :for="todo.id.toString()"
@@ -16,15 +17,18 @@
       </label>
     </div>
     <p
-      class="i-heroicons-trash text-black cursor-pointer hover:text-red"
+      class="i-heroicons-trash text-black cursor-pointer hover:text-red flex-shrink-0"
       @click="() => $emit('deleteItem', todo.id)"
     ></p>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { TTodo } from "../types";
+import { ofetch } from "ofetch";
+import { TTodo } from "../types";
+import { apiUrl, userId } from "../contants";
 
+// props
 defineProps({
   todo: {
     type: Object as TTodo,
@@ -32,5 +36,18 @@ defineProps({
   },
 });
 
+// emits
 defineEmits(["deleteItem"]);
+
+// methods
+const onChange = async (e: { target: { checked: boolean } }, id: number) => {
+  await ofetch(`${apiUrl}/${id}`, {
+    method: "PUT",
+    body: {
+      id,
+      userId,
+      completed: e.target.checked,
+    },
+  });
+};
 </script>

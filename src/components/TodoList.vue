@@ -50,10 +50,7 @@ import { ref } from "vue";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { ofetch } from "ofetch";
 import type { TTodo } from "../types";
-
-// constants
-const userId = 9;
-const apiUrl = "https://jsonplaceholder.typicode.com/todos";
+import { apiUrl, userId } from "../contants";
 
 // local state
 const newTodo = ref("");
