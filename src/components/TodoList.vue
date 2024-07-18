@@ -5,9 +5,6 @@
     <div class="px-4 py-2">
       <h1 class="text-gray-800 font-bold text-2xl uppercase">To-Do List</h1>
     </div>
-    <!-- <p class="text-red" v-if="isTodoExist">
-      "{{ newTodo }}" Already on your list
-    </p> -->
     <form class="px-4 py-2">
       <div class="flex items-center border-b-2 border-teal-500 py-2">
         <input
@@ -37,39 +34,22 @@
       <p class="text-slate-4">{{ error }}</p>
     </div>
     <ul class="px-4 list-none" v-if="todos?.length">
+      <li class="pb-4" v-for="todo_ in todos_" :key="todo_.id">
+        <TodoItem :todo="todo_" @delete-item="(e) => onDeleteTodo(e)" />
+      </li>
       <li class="pb-4" v-for="todo in todos" :key="todo.id">
-        <div class="flex items-center">
-          <input
-            :id="todo.id.toString()"
-            :name="todo.id.toString()"
-            type="checkbox"
-            :checked="todo.completed"
-            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-          />
-          <label
-            :for="todo.id.toString()"
-            class="ml-3 block text-gray-900 text-left"
-          >
-            <span class="text-lg font-medium">{{ todo.title }}</span>
-          </label>
-        </div>
+        <TodoItem :todo="todo" @delete-item="(e) => onDeleteTodo(e)" />
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
+import TodoItem from "./TodoItem.vue";
 import { ref } from "vue";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import { ofetch } from "ofetch";
-
-// types
-type TTodo = {
-  userId: number;
-  id: number;
-  title: string;
-  completed: boolean;
-};
+import type { TTodo } from "../types";
 
 // constants
 const userId = 9;
@@ -77,9 +57,9 @@ const apiUrl = "https://jsonplaceholder.typicode.com/todos";
 
 // local state
 const newTodo = ref("");
+const todos_ = ref<Array<TTodo>>([]);
 
 // vue query hooks
-const queryClient = useQueryClient();
 const {
   isFetching: isQueryFetching,
   isError: isQueryError,
@@ -99,9 +79,6 @@ const mutation = useMutation({
       body: body,
     });
   },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["todos"] });
-  },
 });
 
 // methods
@@ -110,12 +87,23 @@ const onTryAgain = () => {
 };
 const onAddNewTodo = () => {
   if (newTodo.value) {
-    mutation.mutate({
+    const dataToAdd = {
       id: Date.now(),
       title: newTodo.value,
       userId,
-    });
+      completed: false,
+    };
+    mutation.mutate(dataToAdd);
     newTodo.value = "";
+    todos_.value?.push(dataToAdd);
   }
+};
+const onDeleteTodo = async (id: number) => {
+  const indexToDel = todos_.value?.findIndex((t) => (t.id = id));
+  if (indexToDel > -1) {
+    todos_.value?.splice(indexToDel, 1);
+  }
+
+  await ofetch(`${apiUrl}/${id}`, { method: "DELETE" });
 };
 </script>
